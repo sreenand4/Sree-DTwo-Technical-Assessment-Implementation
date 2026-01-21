@@ -9,25 +9,6 @@ A full-stack MERN application for managing configuration settings, built with Do
 - **Database**: MongoDB
 - **Infrastructure**: Docker & Docker Compose
 
-## architecture & Ports
-
-The application consists of three Docker services communicating via a private bridge network:
-
-| Service | Internal Port | Host Port | Description |
-| copy | copy | copy | copy |
-| **frontend** | `5173` | `5173` | React Application (Vite Dev Server) |
-| **backend** | `3000` | `3000` | Express API |
-| **mongo** | `27017` | `27017` | MongoDB Database |
-
-- **Communication**: The services communicate using Docker's internal DNS.
-    - Frontend communicates with Backend via `http://localhost:3000` (browser-side).
-    - Backend communicates with MongoDB via `mongodb://mongo:27017/settings-db` (server-side, internal Docker network).
-
-## Prerequisites
-
-- **Docker Desktop** (Make sure it is installed and running)
-- *No NodeJS or MongoDB installation required on your local machine!*
-
 ## How to Run
 
 1.  **Clone the repository** (if you haven't already):

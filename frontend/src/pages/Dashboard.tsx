@@ -79,7 +79,6 @@ const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) =
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
-      // Dynamic import to avoid circular dependency if any (though api.ts is safe)
       const { getSettings } = await import('../services/api');
       const nextPage = page + 1;
       const response = await getSettings(nextPage);
