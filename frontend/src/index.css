@@ -1,0 +1,55 @@
+:root {
+  /* Color Palette - Deep Dark Mode */
+  --bg-primary: #09090b;
+  /* Very deep dark, almost black */
+  --bg-secondary: #0f0f12;
+  /* Slightly lighter for subtle contrast */
+  --text-primary: #fafafa;
+  --text-secondary: #a1a1aa;
+
+  /* Primary Brand Color - Vibrant Blue */
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+
+  /* Input & Surfaces */
+  --input-bg: #18181b;
+  --input-border: #27272a;
+  --input-placeholder: #52525b;
+
+  /* Spacing & Radius */
+  --radius-full: 9999px;
+  --radius-lg: 0.75rem;
+  --radius-md: 0.5rem;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+  outline: none;
+}
