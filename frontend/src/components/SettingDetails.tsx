@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { updateSetting } from '../services/api';
+import { updateSetting, deleteSetting } from '../services/api';
 
 interface Setting {
   _id: string;
@@ -12,11 +12,11 @@ interface Setting {
 interface SettingDetailsProps {
   setting: Setting | null;
   initialEditMode?: boolean;
-  onUpdate?: (updatedSetting: Setting) => void;
-  onDelete?: (id: string) => void;
+  onUpdateSuccess?: (updatedSetting: Setting) => void;
+  onDeleteSuccess?: (id: string) => void;
 }
 
-const SettingDetails: React.FC<SettingDetailsProps> = ({ setting, initialEditMode = false, onUpdate, onDelete }) => {
+const SettingDetails: React.FC<SettingDetailsProps> = ({ setting, initialEditMode = false, onUpdateSuccess, onDeleteSuccess }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [jsonValue, setJsonValue] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ const SettingDetails: React.FC<SettingDetailsProps> = ({ setting, initialEditMod
     try {
       const parsedValue = JSON.parse(jsonValue);
       const updated = await updateSetting(setting._id, parsedValue);
-      if (onUpdate) onUpdate(updated);
+      if (onUpdateSuccess) onUpdateSuccess(updated);
       setIsEditing(false);
       setError(null);
     } catch (err) {
@@ -46,6 +46,16 @@ const SettingDetails: React.FC<SettingDetailsProps> = ({ setting, initialEditMod
       }
     }
   };
+
+  const handleDelete = async () => {
+    if (!setting || !setting._id) return;
+    try {
+      await deleteSetting(setting._id);
+      if (onDeleteSuccess) onDeleteSuccess(setting._id);
+    } catch (err) {
+      console.error(err);
+    }
+  }
 
   if (!setting) {
     return (
@@ -76,7 +86,11 @@ const SettingDetails: React.FC<SettingDetailsProps> = ({ setting, initialEditMod
         {!isEditing ? (
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button 
-                onClick={() => onDelete && setting && onDelete(setting._id)}
+                onClick={() => {
+                  if (window.confirm(`Are you sure you want to delete "${setting.name}"?`)) {
+                    handleDelete();
+                  }
+                }}
                 style={{
                   padding: '0.5rem 1rem',
                   backgroundColor: 'transparent',

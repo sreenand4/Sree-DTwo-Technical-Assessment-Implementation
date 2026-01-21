@@ -9,14 +9,14 @@ interface Setting {
 interface SettingsSidebarProps {
   settings: Setting[];
   selectedId: string | null;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
   onSelect: (setting: Setting) => void;
   onCreateNew: () => void;
-  hasMore?: boolean;
   onLoadMore?: () => void;
-  isLoadingMore?: boolean;
 }
 
-const SettingsSidebar: React.FC<SettingsSidebarProps> = ({ 
+const SettingsSidebar: React.FC<SettingsSidebarProps> = ({
   settings, 
   selectedId, 
   onSelect, 

@@ -3,7 +3,7 @@ import SettingsSidebar from '../components/SettingsSidebar';
 import SettingDetails from '../components/SettingDetails';
 import CreateSettingModal from '../components/CreateSettingModal';
 
-// Define the interface here or import it if centralized
+// Define the interface here
 interface Setting {
   _id: string;
   name: string;
@@ -20,8 +20,9 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) => {
   const [settings, setSettings] = useState<Setting[]>(initialSettings);
   const [selectedId, setSelectedId] = useState<string | null>(initialSettings.length > 0 ? initialSettings[0]._id : null);
+  const selectedSetting = settings.find(s => s._id === selectedId) || null;
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // Check URL for "new=true" param to enable auto-edit on first load
+  // Check URL for "new=true" param to enable auto-edit
   const [autoEdit, setAutoEdit] = useState(() => new URLSearchParams(window.location.search).get('new') === 'true');
   
   // Pagination State
@@ -36,8 +37,6 @@ const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) =
     }
   }, []);
 
-  const selectedSetting = settings.find(s => s._id === selectedId) || null;
-
   const handleCreateSuccess = (newSetting: Setting) => {
     setSettings((prev) => [newSetting, ...prev]);
     setSelectedId(newSetting._id);
@@ -50,26 +49,18 @@ const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) =
      setAutoEdit(false);
   };
 
-  const handleDeleteSuccess = async (id: string) => {
-      try {
-          const { deleteSetting } = await import('../services/api');
-          await deleteSetting(id);
-          
-          const newSettings = settings.filter(s => s._id !== id);
-          
-          if (newSettings.length === 0) {
-              window.location.reload(); // Reload to trigger App.tsx -> LandingPage
-          } else {
-              setSettings(newSettings);
-              // Select the first one available
-              if (selectedId === id) {
-                 setSelectedId(newSettings[0]._id);
-              }
-              setAutoEdit(false);
+  const handleDeleteSuccess = (deletedId: string) => {
+      const newSettings = settings.filter(s => s._id !== deletedId);
+      
+      if (newSettings.length === 0) {
+          window.location.reload(); // Reload to trigger App.tsx -> LandingPage
+      } else {
+          setSettings(newSettings);
+          // Select the first one available
+          if (selectedId === deletedId) {
+             setSelectedId(newSettings[0]._id);
           }
-      } catch (error) {
-          console.error("Failed to delete", error);
-          alert("Failed to delete setting");
+          setAutoEdit(false);
       }
   };
 
@@ -107,7 +98,7 @@ const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) =
         selectedId={selectedId} 
         onSelect={(s) => {
             setSelectedId(s._id);
-            setAutoEdit(false); // Disable auto-edit when manually selecting
+            setAutoEdit(false);
         }} 
         onCreateNew={() => setIsModalOpen(true)}
         hasMore={hasMore}
@@ -117,8 +108,8 @@ const Dashboard: React.FC<DashboardProps> = ({ initialSettings, initialMeta }) =
       <SettingDetails 
         setting={selectedSetting} 
         initialEditMode={autoEdit}
-        onUpdate={handleUpdateSuccess}
-        onDelete={handleDeleteSuccess}
+        onUpdateSuccess={handleUpdateSuccess}
+        onDeleteSuccess={handleDeleteSuccess}
       />
       
       <CreateSettingModal 
