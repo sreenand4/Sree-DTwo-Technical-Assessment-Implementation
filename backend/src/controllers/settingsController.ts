@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Setting from '../models/Setting';
+import mongoose from 'mongoose';
 import { randomUUID } from 'crypto';
 
 export const createSetting = async (req: Request, res: Response) => {
@@ -12,6 +13,12 @@ export const createSetting = async (req: Request, res: Response) => {
         }
 
         const newSetting = new Setting({ name, value });
+
+        // enforce JSON object
+        if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+            return res.status(400).json({ message: 'Value must be a JSON object' });
+        }
+
         const savedSetting = await newSetting.save();
 
         console.log('Saved setting:', savedSetting);
@@ -26,7 +33,11 @@ export const createSetting = async (req: Request, res: Response) => {
 export const getSettings = async (req: Request, res: Response) => {
     try {
         const page = parseInt(req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 20;
+        let limit = parseInt(req.query.limit as string) || 20;
+
+        // ensure limit is positive
+        if (limit <= 0) limit = 20;
+
         const skip = (page - 1) * limit;
 
         const total = await Setting.countDocuments();
@@ -71,6 +82,13 @@ export const updateSetting = async (req: Request, res: Response) => {
     const { value } = req.body;
 
     try {
+        // Enforce JSON object on update if value is present
+        if (value !== undefined) {
+            if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+                return res.status(400).json({ message: 'Value must be a JSON object' });
+            }
+        }
+
         const updatedSetting = await Setting.findByIdAndUpdate(
             id,
             { value }, // Only update value, ignore name changes
@@ -90,17 +108,20 @@ export const updateSetting = async (req: Request, res: Response) => {
 
 export const deleteSetting = async (req: Request, res: Response) => {
     const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing setting ID' });
+
+    // Check if setting exists
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(200).json({ message: 'Item does not exist' });
+    }
 
     try {
         const deletedSetting = await Setting.findByIdAndDelete(id);
-
-        if (!deletedSetting) {
-            return res.status(404).json({ message: 'Setting not found' });
-        }
-
-        return res.status(200).json({ message: 'Setting deleted successfully' });
+        // idempotency
+        if (!deletedSetting) return res.status(200).json({ message: 'Item already deleted' });
+        return res.status(200).json({ message: 'Setting deleted successfully', deleted_object: deletedSetting });
     } catch (error) {
         console.error('Error deleting setting:', error);
-        return res.status(500).json({ message: 'Controller failed to delete setting' });
+        return res.status(500).json({ message: 'Server failed to delete setting' });
     }
 };

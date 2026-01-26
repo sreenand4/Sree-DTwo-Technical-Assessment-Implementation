@@ -19,7 +19,8 @@ const SettingSchema: Schema = new Schema({
         default: {}
     }
 }, {
-    timestamps: true
+    timestamps: true,
+    minimize: false
 })
 
 export default mongoose.model<ISetting>('Setting', SettingSchema);
